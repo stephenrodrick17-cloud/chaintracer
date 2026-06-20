@@ -1,0 +1,10 @@
+# This is just for Render to detect Python project
+fastapi
+uvicorn
+httpx
+scikit-learn
+pandas
+numpy
+xgboost
+networkx
+joblib

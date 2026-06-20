@@ -1,0 +1,60 @@
+# Node modules
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.env
+venv/
+ENV/
+
+# Database
+*.db
+*.sqlite3
+
+# Large Data & Models
+backend/data/
+backend/models/
+*.csv
+*.pkl
+*.npy
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Media/Assets (if needed to ignore)
+ezgif-807cb29599344c41-jpg/
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
