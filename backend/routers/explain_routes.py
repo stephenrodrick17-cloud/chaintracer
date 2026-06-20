@@ -5,7 +5,7 @@ import os
 
 router = APIRouter()
 
-OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "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")
+OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
 
 class ExplainRequest(BaseModel):
     prompt: str
