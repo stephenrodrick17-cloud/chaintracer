@@ -2,12 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import cytoscape from 'cytoscape'
 import fcose from 'cytoscape-fcose'
 import { motion } from 'framer-motion'
-import { Search, ZoomIn, ZoomOut, RefreshCw, Maximize, Send, Bot, Loader2 } from 'lucide-react'
-import { graphApi, predictApi } from '../api'
+import { Search, ZoomIn, ZoomOut, RefreshCw, Maximize, Send, Bot, Loader2, Menu, X } from 'lucide-react'
+import { graphApi, predictApi, explainApi } from '../api'
 import { cytoscapeStyles } from '../utils/cytoscapeStyles'
 import { useQuery } from '@tanstack/react-query'
 import RiskBadge from '../components/RiskBadge'
-import axios from 'axios'
 
 cytoscape.use(fcose)
 
@@ -20,6 +19,8 @@ export default function GraphExplorer() {
   const [chatMessages, setChatMessages] = useState([])
   const [chatInput, setChatInput] = useState('')
   const [isChatLoading, setIsChatLoading] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [chatOpen, setChatOpen] = useState(true)
 
   const { data: graphData, refetch, isFetching } = useQuery({
     queryKey: ['graph', searchId, hops],
@@ -88,9 +89,9 @@ export default function GraphExplorer() {
       }
       context += `User question: ${userInput}`
 
-      const response = await axios.post('http://127.0.0.1:8000/api/explain', { prompt: context })
+      const response = await explainApi.getExplanation(context)
       
-      setChatMessages(prev => [...prev, { role: 'assistant', content: response.data.explanation }])
+      setChatMessages(prev => [...prev, { role: 'assistant', content: response.explanation }])
     } catch (err) {
       console.error('Chat error:', err)
       setChatMessages(prev => [...prev, { role: 'assistant', content: 'I\'m sorry, I couldn\'t process that request right now. Let\'s try again later!' }])
@@ -116,9 +117,35 @@ export default function GraphExplorer() {
       </div>
 
       <div className="flex flex-1 overflow-hidden relative z-10">
+        {/* Mobile Sidebar Toggle */}
+        <div className="lg:hidden absolute top-4 left-4 z-30">
+          <button 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl"
+          >
+            {sidebarOpen ? <X size={24} className="text-white" /> : <Menu size={24} className="text-white" />}
+          </button>
+        </div>
+
+        {/* Mobile Chat Toggle */}
+        <div className="lg:hidden absolute top-4 right-4 z-30">
+          <button 
+            onClick={() => setChatOpen(!chatOpen)}
+            className="p-2 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl"
+          >
+            {chatOpen ? <X size={24} className="text-white" /> : <Bot size={24} className="text-white" />}
+          </button>
+        </div>
+
         {/* Sidebar */}
-        <div className="w-80 bg-black/40 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col space-y-6 overflow-y-auto">
-          <div>
+        <div className={`
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+          lg:translate-x-0
+          fixed lg:static inset-y-0 left-0 z-20
+          w-80 bg-black/40 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col space-y-6 overflow-y-auto
+          transition-transform duration-300
+        `}>
+          <div className="mt-12 lg:mt-0">
             <h2 className="text-2xl font-black mb-1 tracking-tight">Graph Explorer</h2>
             <p className="text-xs text-slate-400 uppercase font-bold tracking-widest">Dataset Mode</p>
           </div>
@@ -239,7 +266,13 @@ export default function GraphExplorer() {
         </div>
 
         {/* Chatbot Panel */}
-        <div className="w-96 bg-black/40 backdrop-blur-xl border-l border-white/10 p-6 flex flex-col">
+        <div className={`
+          ${chatOpen ? 'translate-x-0' : 'translate-x-full'} 
+          lg:translate-x-0
+          fixed lg:static inset-y-0 right-0 z-20
+          w-full sm:w-96 bg-black/40 backdrop-blur-xl border-l border-white/10 p-6 flex flex-col
+          transition-transform duration-300
+        `}>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
               <Bot className="w-6 h-6 text-white" />

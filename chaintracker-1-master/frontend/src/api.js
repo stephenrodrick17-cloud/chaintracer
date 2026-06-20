@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -41,6 +41,10 @@ export const reportApi = {
 export const multiAgentApi = {
   checkFraud: (data) => api.post('/multi-agent/check', data).then(res => res.data),
   getAgentStatus: () => api.get('/multi-agent/status').then(res => res.data),
+};
+
+export const explainApi = {
+  getExplanation: (prompt) => api.post('/explain', { prompt }).then(res => res.data),
 };
 
 export default api;

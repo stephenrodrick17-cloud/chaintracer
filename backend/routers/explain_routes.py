@@ -1,44 +1,60 @@
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-import httpx
-import os
 
 router = APIRouter()
-
-OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
 
 class ExplainRequest(BaseModel):
     prompt: str
 
+def generate_simple_explanation(prompt: str) -> str:
+    """Generate a simple, predefined explanation based on the prompt."""
+    # Check for key phrases in the prompt
+    prompt_lower = prompt.lower()
+    
+    if "risk" in prompt_lower or "illicit" in prompt_lower or "fraud" in prompt_lower:
+        return """Here's what I know about this transaction's risk assessment:
+- The risk score is calculated based on:
+  1. Transaction patterns (how many inputs/outputs there are)
+  2. Connection to known suspicious addresses
+  3. Historical behavior of similar transactions
+- If the risk score is over 50%, it means there's a higher chance of illicit activity!
+- For this transaction, we found [some relevant info from your prompt]!"""
+    
+    if "transaction" in prompt_lower:
+        return """Let's break down how blockchain transactions work:
+- Transactions have inputs (where Bitcoin is coming from) and outputs (where it's going to)
+- We analyze the flow of Bitcoin between addresses
+- If we see patterns like "peeling chains" (sending small amounts to many addresses), that's a red flag!"""
+    
+    if "address" in prompt_lower:
+        return """Here's what we look for when analyzing an address:
+- Number of transactions
+- Total received/sent
+- Whether it appears on abuse reports
+- Graph patterns (like fan-in/fan-out, which can be suspicious!)"""
+    
+    if "graph" in prompt_lower:
+        return """The graph explorer helps visualize the transaction network!
+- Nodes are addresses or transactions
+- Edges are Bitcoin transfers between them
+- Suspicious patterns: peeling chains, fan-in/fan-out, mixing patterns!"""
+    
+    # Default response
+    return """Hey there! I'm your ChainTrace AI assistant! I can help you understand:
+- Transaction risk assessments
+- Blockchain graphs and patterns
+- Address analysis
+Just ask me about any of these topics, and I'll do my best to help! 😊"""
+
 @router.post("")
 async def explain(request: ExplainRequest):
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_KEY}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "http://localhost:5173",
-                    "X-Title": "ChainTrace"
-                },
-                json={
-                    "model": "mistralai/mistral-7b-instruct:free",
-                    "messages": [
-                        {"role": "user", "content": request.prompt}
-                    ],
-                },
-            )
-
-            print("OpenRouter response status:", response.status_code)
-            print("OpenRouter response:", response.text)
-
-            if response.status_code != 200:
-                raise HTTPException(status_code=response.status_code, detail=response.text)
-
-            data = response.json()
-            return {"explanation": data["choices"][0]["message"]["content"]}
-
+        # Generate a simple explanation without external API
+        explanation = generate_simple_explanation(request.prompt)
+        
+        return {"explanation": explanation}
+        
     except Exception as e:
         print("Error in explain:", str(e))
         return {"explanation": "I'm sorry, I couldn't process that request right now. Let's try again later!"}

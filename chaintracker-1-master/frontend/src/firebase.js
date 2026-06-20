@@ -12,8 +12,8 @@ const firebaseConfig = {
   projectId: "chaintracer-16381",
   storageBucket: "chaintracer-16381.firebasestorage.app",
   messagingSenderId: "361844745988",
-  appId: "1:361844745988:web:df837ae2c96137f9789251",
-  measurementId: "G-RWX0QTJEFQ"
+  appId: "1:361844745988:web:b96dfb784b481f92789251",
+  measurementId: "G-88BBVFL5YV"
 };
 
 // Initialize Firebase
