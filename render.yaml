@@ -3,6 +3,7 @@ services:
     name: fraud-detection-backend
     env: python
     plan: starter
+    dockerfilePath: null
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port 10000"
     autoDeploy: true
@@ -12,6 +13,7 @@ services:
     name: fraud-detection-frontend
     env: static
     plan: starter
+    dockerfilePath: null
     buildCommand: "cd chaintracker-1-master/frontend && npm install && npm run build"
     staticPublishPath: "chaintracker-1-master/frontend/dist"
     autoDeploy: true

@@ -1,20 +1,3 @@
-__pycache__
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-*.egg
-*.egg-info
-dist
-build
-.git
-.gitignore
-.env
-.venv
-venv
-ENV
-env
-frontend/
-node_modules/
-*.db
+# Ignore Dockerfile to prevent Render from using Docker
+Dockerfile
+.dockerignore
