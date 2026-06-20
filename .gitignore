@@ -58,3 +58,6 @@ ezgif-807cb29599344c41-jpg/
 .idea/
 *.swp
 *.swo
+
+# Test files
+test_pipeline.py
