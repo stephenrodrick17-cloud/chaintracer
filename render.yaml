@@ -8,10 +8,10 @@ services:
     autoDeploy: true
     healthCheckPath: "/health"
 
-staticSites:
-  - name: fraud-detection-frontend
+  - type: web
+    name: fraud-detection-frontend
     env: static
     plan: free
     buildCommand: "cd chaintracker-1-master/frontend && npm install && npm run build"
-    publishDir: "chaintracker-1-master/frontend/dist"
+    staticPublishPath: "chaintracker-1-master/frontend/dist"
     autoDeploy: true
