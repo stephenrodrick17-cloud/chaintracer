@@ -64,7 +64,10 @@ class ReportingAgent(BaseAgent):
         """
         Save report to database (mock implementation)
         """
-        from ...database.db import get_db_connection
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        from database.db import get_db_connection
         try:
             conn = get_db_connection()
             cursor = conn.cursor()

@@ -13,7 +13,7 @@ async def call_openrouter(system_prompt: str, user_prompt: str, model: str = "me
     Call OpenRouter API with the given prompts.
     """
     if not OPENROUTER_API_KEY:
-        raise ValueError("OPENROUTER_API_KEY not set")
+        raise Exception("OPENROUTER_API_KEY not set")
     
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
