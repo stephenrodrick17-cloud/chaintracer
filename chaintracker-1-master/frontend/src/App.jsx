@@ -9,6 +9,7 @@ import GraphExplorer from './pages/GraphExplorer'
 import MLPredictions from './pages/MLPredictions'
 import ClusterReport from './pages/ClusterReport'
 import MultiAgentFraudDetector from './pages/MultiAgentFraudDetector'
+import AdvancedAI from './pages/AdvancedAI'
 
 const queryClient = new QueryClient()
 
@@ -27,6 +28,7 @@ function App() {
               <Route path="/predictions" element={<MLPredictions />} />
               <Route path="/clusters" element={<ClusterReport />} />
               <Route path="/multi-agent" element={<MultiAgentFraudDetector />} />
+              <Route path="/advanced-ai" element={<AdvancedAI />} />
             </Routes>
           </main>
           <Toaster position="bottom-right" toastOptions={{

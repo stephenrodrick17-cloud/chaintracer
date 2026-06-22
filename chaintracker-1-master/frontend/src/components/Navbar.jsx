@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Search, Network, Brain, GitBranch, Link as ChainIcon, Settings, Menu, X, Shield } from 'lucide-react'
+import { LayoutDashboard, Search, Network, Brain, GitBranch, Link as ChainIcon, Settings, Menu, X, Shield, BrainCircuit } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: 'ML Predictions', path: '/predictions', icon: Brain },
   { label: 'Clusters', path: '/clusters', icon: GitBranch },
   { label: 'Multi-Agent', path: '/multi-agent', icon: ChainIcon },
+  { label: 'Advanced AI', path: '/advanced-ai', icon: BrainCircuit },
 ]
 
 export default function Navbar() {

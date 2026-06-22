@@ -41,6 +41,12 @@ export const reportApi = {
 export const multiAgentApi = {
   checkFraud: (data) => api.post('/multi-agent/check', data).then(res => res.data),
   getAgentStatus: () => api.get('/multi-agent/status').then(res => res.data),
+  analyzeComputerVision: (data) => api.post('/multi-agent/computer-vision', data).then(res => res.data),
+  analyzeNLP: (data) => api.post('/multi-agent/nlp', data).then(res => res.data),
+  analyzeSpeech: (data) => api.post('/multi-agent/speech', data).then(res => res.data),
+  analyzeGeospatial: (data) => api.post('/multi-agent/geospatial', data).then(res => res.data),
+  analyzeGraphAI: (data) => api.post('/multi-agent/graph-ai', data).then(res => res.data),
+  fuseIntelligence: (data) => api.post('/multi-agent/intelligence-fusion', data).then(res => res.data),
 };
 
 export const explainApi = {
