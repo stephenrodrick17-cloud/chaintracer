@@ -78,16 +78,8 @@ const AdvancedAI = () => {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans overflow-hidden relative">
-      {/* Video Background */}
+      {/* Background */}
       <div className="absolute inset-0 z-0">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover opacity-40 brightness-75"
-          src="/Digital_network_to_fingerprint_scan_202606202019.mp4"
-        />
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/90" />
         <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:30px_30px] opacity-[0.02]" />
       </div>
