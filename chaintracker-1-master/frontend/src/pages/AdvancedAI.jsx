@@ -5,6 +5,9 @@ import { multiAgentApi } from '../api';
 const AdvancedAI = () => {
   const [activeTab, setActiveTab] = useState('nlp');
   const [inputValue, setInputValue] = useState('');
+  const [description, setDescription] = useState('');
+  const [transcript, setTranscript] = useState('');
+  const [query, setQuery] = useState('Analyze this area for potential threats');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -31,13 +34,24 @@ const AdvancedAI = () => {
           response = await multiAgentApi.analyzeNLP({ text: inputValue });
           break;
         case 'computer-vision':
-          response = await multiAgentApi.analyzeComputerVision({ type: 'image', filename: inputValue });
+          response = await multiAgentApi.analyzeComputerVision({ 
+            type: 'image', 
+            filename: inputValue,
+            description: description
+          });
           break;
         case 'speech':
-          response = await multiAgentApi.analyzeSpeech({ type: 'audio', filename: inputValue });
+          response = await multiAgentApi.analyzeSpeech({ 
+            type: 'audio', 
+            filename: inputValue,
+            transcript: transcript
+          });
           break;
         case 'geospatial':
-          response = await multiAgentApi.analyzeGeospatial({ locations: [] });
+          response = await multiAgentApi.analyzeGeospatial({ 
+            locations: [],
+            query: query
+          });
           break;
         case 'graph-ai':
           response = await multiAgentApi.analyzeGraphAI({ graph: {} });
@@ -144,19 +158,55 @@ const AdvancedAI = () => {
                     </div>
                   )}
 
-                  {(activeTab === 'computer-vision' || activeTab === 'speech') && (
-                    <div>
+                  {activeTab === 'computer-vision' && (
+                    <div className="space-y-4">
                       <input
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder={`Enter ${activeTab === 'computer-vision' ? 'image' : 'audio'} filename or path...`}
+                        placeholder="Enter image filename..."
+                        className="w-full px-6 py-4 text-lg bg-white/5 border border-white/10 rounded-2xl text-white placeholder-zinc-500 focus:border-white/30 focus:bg-white/10 focus:outline-none transition-all font-mono text-sm"
+                      />
+                      <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Describe the image (e.g., 'A passport photo that may be counterfeit' or 'A video that looks like a deepfake')..."
+                        className="w-full h-32 px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-zinc-500 focus:border-white/30 focus:bg-white/10 focus:outline-none transition-all font-mono text-sm resize-none"
+                      />
+                    </div>
+                  )}
+
+                  {activeTab === 'speech' && (
+                    <div className="space-y-4">
+                      <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Enter audio filename..."
+                        className="w-full px-6 py-4 text-lg bg-white/5 border border-white/10 rounded-2xl text-white placeholder-zinc-500 focus:border-white/30 focus:bg-white/10 focus:outline-none transition-all font-mono text-sm"
+                      />
+                      <textarea
+                        value={transcript}
+                        onChange={(e) => setTranscript(e.target.value)}
+                        placeholder="Transcript of the audio (to analyze for abusive content, scams, etc.)..."
+                        className="w-full h-32 px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-zinc-500 focus:border-white/30 focus:bg-white/10 focus:outline-none transition-all font-mono text-sm resize-none"
+                      />
+                    </div>
+                  )}
+
+                  {activeTab === 'geospatial' && (
+                    <div className="space-y-4">
+                      <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="What would you like to analyze? (e.g., 'Crime hotspots in New York' or 'Patrol optimization for downtown')"
                         className="w-full px-6 py-4 text-lg bg-white/5 border border-white/10 rounded-2xl text-white placeholder-zinc-500 focus:border-white/30 focus:bg-white/10 focus:outline-none transition-all font-mono text-sm"
                       />
                     </div>
                   )}
 
-                  {(activeTab === 'geospatial' || activeTab === 'graph-ai' || activeTab === 'fusion') && (
+                  {(activeTab === 'graph-ai' || activeTab === 'fusion') && (
                     <div className="p-6 bg-white/5 rounded-2xl border border-white/10 text-center">
                       <div className="text-zinc-500 text-sm">Click Start Analysis to run a simulated analysis</div>
                     </div>
@@ -311,10 +361,10 @@ const AdvancedAI = () => {
                               {Math.round(result.analysis.ai_confidence * 100)}%
                             </div>
                           </div>
-                          <div className={`p-6 rounded-2xl border-2 ${getRiskColor(result.analysis.spoofing_confidence)}`}>
-                            <h4 className="text-sm font-black uppercase tracking-widest text-zinc-400 mb-3">Spoofing</h4>
+                          <div className={`p-6 rounded-2xl border-2 ${getRiskColor(result.analysis.abusive_language_confidence)}`}>
+                            <h4 className="text-sm font-black uppercase tracking-widest text-zinc-400 mb-3">Abusive</h4>
                             <div className="text-3xl font-black tabular-nums">
-                              {Math.round(result.analysis.spoofing_confidence * 100)}%
+                              {Math.round(result.analysis.abusive_language_confidence * 100)}%
                             </div>
                           </div>
                         </div>
@@ -329,7 +379,7 @@ const AdvancedAI = () => {
                             <div className="space-y-3">
                               {result.analysis.crime_hotspots.map((hotspot, idx) => (
                                 <div key={idx} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-                                  <span className="font-bold">{hotspot.risk.toUpperCase()}</span>
+                                  <span className="font-bold">{hotspot.area_name || 'Unknown'} - {hotspot.risk.toUpperCase()}</span>
                                   <span className="text-zinc-400">{hotspot.incidents} incidents</span>
                                 </div>
                               ))}
@@ -343,7 +393,7 @@ const AdvancedAI = () => {
                               {result.analysis.patrol_recommendations.map((rec, idx) => (
                                 <li key={idx} className="flex items-start gap-3 text-zinc-300">
                                   <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                                  <span className="font-medium">{rec.area}: {rec.priority}</span>
+                                  <span className="font-medium">{rec.area}: {rec.priority} - {rec.suggested_patrols} patrols</span>
                                 </li>
                               ))}
                             </ul>
