@@ -1,10 +1,10 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .modules.dataset_loader import load_dataset
-from .modules.model_service import load_models
-from .routers import predict_routes, trace_routes, graph_routes, dataset_routes, report_routes, multi_agent_routes, explain_routes
-from .database.db import create_tables
+from modules.dataset_loader import load_dataset
+from modules.model_service import load_models
+from routers import predict_routes, trace_routes, graph_routes, dataset_routes, report_routes, multi_agent_routes, explain_routes
+from database.db import create_tables
 
 app = FastAPI(title='Multi-Agent Fraud Detection System', version='2.0')
 

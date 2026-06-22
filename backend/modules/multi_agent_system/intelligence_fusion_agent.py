@@ -1,5 +1,7 @@
 from .base_agent import BaseAgent
 from typing import Dict, Any
+from utils import call_openrouter
+import json
 
 
 class IntelligenceFusionAgent(BaseAgent):
@@ -23,20 +25,67 @@ class IntelligenceFusionAgent(BaseAgent):
 
         try:
             agent_results = data.get("agent_results", {})
-            results["fusion_report"] = self._fuse_intelligence(agent_results)
+            results["fusion_report"] = await self._fuse_intelligence(agent_results)
             
         except Exception as e:
             results["status"] = "error"
             results["error"] = str(e)
+            results["fusion_report"] = self._fallback_fuse_intelligence(data.get("agent_results", {}))
 
         self.update_status("idle")
         return results
 
-    def _fuse_intelligence(self, agent_results: Dict[str, Any]) -> Dict[str, Any]:
+    async def _fuse_intelligence(self, agent_results: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Fuse intelligence from all agents into a single report
+        Fuse intelligence from all agents using OpenRouter.
         """
-        # Extract results from each agent
+        results_str = json.dumps(agent_results, indent=2)
+        
+        system_prompt = """You are a cybersecurity intelligence fusion agent. Analyze all agent results and respond ONLY with a JSON object in this exact format:
+{
+  "overall_risk_level": string (critical, high, medium, low),
+  "overall_risk_score": number (0-1),
+  "correlated_insights": array of strings,
+  "key_findings": array of strings,
+  "recommended_actions": array of strings,
+  "agent_contributions": {
+    "computer_vision": boolean,
+    "nlp": boolean,
+    "speech": boolean,
+    "geospatial": boolean,
+    "graph_ai": boolean,
+    "blockchain": boolean
+  },
+  "threat_actor_profile": object,
+  "timeline_of_events": array,
+  "mitigation_strategies": array of strings
+}
+"""
+        user_prompt = f"""Fuse intelligence from all these agents:
+{results_str}
+
+Identify correlations, threat actors, and recommended actions."""
+        
+        try:
+            response = await call_openrouter(system_prompt, user_prompt)
+            cleaned_response = response.strip()
+            if cleaned_response.startswith("```json"):
+                cleaned_response = cleaned_response[7:]
+            if cleaned_response.startswith("```"):
+                cleaned_response = cleaned_response[3:]
+            if cleaned_response.endswith("```"):
+                cleaned_response = cleaned_response[:-3]
+            
+            parsed = json.loads(cleaned_response.strip())
+            return parsed
+        except Exception as e:
+            print(f"OpenRouter Fusion error: {e}")
+            return self._fallback_fuse_intelligence(agent_results)
+
+    def _fallback_fuse_intelligence(self, agent_results: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Fallback fusion if OpenRouter fails.
+        """
         cv_result = agent_results.get("computer_vision", {})
         nlp_result = agent_results.get("nlp", {})
         speech_result = agent_results.get("speech", {})
@@ -44,7 +93,6 @@ class IntelligenceFusionAgent(BaseAgent):
         graph_result = agent_results.get("graph_ai", {})
         blockchain_result = agent_results.get("blockchain", {})
 
-        # Calculate overall risk
         risk_scores = []
         if cv_result.get("analysis", {}).get("is_deepfake"):
             risk_scores.append(cv_result["analysis"]["deepfake_confidence"])
@@ -70,8 +118,20 @@ class IntelligenceFusionAgent(BaseAgent):
                 "nlp": nlp_result.get("status") == "success",
                 "speech": speech_result.get("status") == "success",
                 "geospatial": geospatial_result.get("status") == "success",
-                "graph_ai": graph_result.get("status") == "success"
-            }
+                "graph_ai": graph_result.get("status") == "success",
+                "blockchain": blockchain_result.get("status") == "success" if blockchain_result else False
+            },
+            "threat_actor_profile": {
+                "type": "Unknown",
+                "sophistication": "Medium",
+                "motivation": "Financial"
+            },
+            "timeline_of_events": [],
+            "mitigation_strategies": [
+                "Monitor closely",
+                "Report suspicious activity",
+                "Implement security patches"
+            ]
         }
 
     def _correlate_insights(self, agent_results: Dict[str, Any]) -> list:

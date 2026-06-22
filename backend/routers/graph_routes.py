@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter
-from ..modules import graph_builder
+from modules import graph_builder
 
 router = APIRouter()
 

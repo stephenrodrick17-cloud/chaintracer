@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter
-from ..modules import cluster_analyzer
+from modules import cluster_analyzer
 
 router = APIRouter()
 

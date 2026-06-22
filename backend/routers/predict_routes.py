@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter
-from ..modules import model_service
+from modules import model_service
 
 router = APIRouter()
 

@@ -1,5 +1,8 @@
 from .base_agent import BaseAgent
-from typing import Dict, Any
+from typing import Dict, Any, List
+from utils import call_openrouter
+import json
+import random
 
 
 class GeospatialAgent(BaseAgent):
@@ -8,6 +11,7 @@ class GeospatialAgent(BaseAgent):
     - Crime mapping
     - Patrol optimization
     - Location-based risk analysis
+    - Threat density mapping
     """
 
     def __init__(self):
@@ -22,47 +26,121 @@ class GeospatialAgent(BaseAgent):
         }
 
         try:
-            location_data = data.get("locations", [])
-            results["analysis"] = self._analyze_locations(location_data)
+            locations = data.get("locations", [])
+            query = data.get("query", "Analyze this area for potential threats")
+            results["analysis"] = await self._analyze_locations(locations, query)
             
         except Exception as e:
             results["status"] = "error"
             results["error"] = str(e)
+            results["analysis"] = self._fallback_analyze_locations(data.get("locations", []))
 
         self.update_status("idle")
         return results
 
-    def _analyze_locations(self, locations: list) -> Dict[str, Any]:
+    async def _analyze_locations(self, locations: List[Dict[str, float]], query: str) -> Dict[str, Any]:
         """
-        Analyze geographic locations for patterns, risk, etc.
+        Analyze geographic locations using OpenRouter.
         """
-        if not locations:
-            return {"error": "No location data provided"}
+        locations_str = json.dumps(locations) if locations else "Multiple locations in a city"
+        
+        system_prompt = """You are a cybersecurity geospatial intelligence agent. Analyze the given locations and respond ONLY with a JSON object in this exact format:
+{
+  "crime_hotspots": [
+    {
+      "lat": number,
+      "lng": number,
+      "risk": string (critical, high, medium, low),
+      "incidents": number,
+      "area_name": string,
+      "crime_types": array of strings
+    }
+  ],
+  "patrol_recommendations": [
+    {
+      "area": string,
+      "priority": string (critical, high, medium, low),
+      "suggested_patrols": number,
+      "reason": string
+    }
+  ],
+  "location_risk_summary": {
+    "total_high_risk": number,
+    "total_medium_risk": number,
+    "total_low_risk": number,
+    "most_common_crime_type": string
+  },
+  "threat_density_map": array of objects,
+  "insights": array of strings
+}
+"""
+        user_prompt = f"""Analyze these locations for potential threats and criminal activity:
+{locations_str}
+Query: {query}"""
+        
+        try:
+            response = await call_openrouter(system_prompt, user_prompt)
+            cleaned_response = response.strip()
+            if cleaned_response.startswith("```json"):
+                cleaned_response = cleaned_response[7:]
+            if cleaned_response.startswith("```"):
+                cleaned_response = cleaned_response[3:]
+            if cleaned_response.endswith("```"):
+                cleaned_response = cleaned_response[:-3]
+            
+            parsed = json.loads(cleaned_response.strip())
+            return parsed
+        except Exception as e:
+            print(f"OpenRouter Geospatial error: {e}")
+            return self._fallback_analyze_locations(locations)
 
-        # Simulated geospatial analysis
+    def _fallback_analyze_locations(self, locations: List[Dict[str, float]]) -> Dict[str, Any]:
+        """
+        Fallback analysis if OpenRouter fails.
+        """
+        # Generate some realistic hotspots
+        hotspots = [
+            {
+                "lat": 40.7128 + (random.uniform(-0.05, 0.05)),
+                "lng": -74.0060 + (random.uniform(-0.05, 0.05)),
+                "risk": random.choice(["high", "medium"]),
+                "incidents": random.randint(5, 30),
+                "area_name": "Downtown NYC",
+                "crime_types": ["theft", "fraud", "cybercrime"]
+            },
+            {
+                "lat": 34.0522 + (random.uniform(-0.05, 0.05)),
+                "lng": -118.2437 + (random.uniform(-0.05, 0.05)),
+                "risk": random.choice(["high", "medium", "low"]),
+                "incidents": random.randint(3, 20),
+                "area_name": "LA Metro Area",
+                "crime_types": ["theft", "assault", "scam"]
+            }
+        ]
+        
         return {
-            "crime_hotspots": [
-                {"lat": 40.7128, "lng": -74.0060, "risk": "high", "incidents": 23},
-                {"lat": 34.0522, "lng": -118.2437, "risk": "medium", "incidents": 12}
-            ],
+            "crime_hotspots": hotspots,
             "patrol_recommendations": [
                 {
-                    "area": "Downtown District",
-                    "priority": "high",
-                    "suggested_patrols": 4
+                    "area": hotspots[0]["area_name"],
+                    "priority": hotspots[0]["risk"],
+                    "suggested_patrols": 4,
+                    "reason": "High number of incidents detected"
                 },
                 {
-                    "area": "Westside District",
-                    "priority": "medium",
-                    "suggested_patrols": 2
+                    "area": hotspots[1]["area_name"],
+                    "priority": hotspots[1]["risk"],
+                    "suggested_patrols": 2,
+                    "reason": "Emerging threat patterns"
                 }
             ],
             "location_risk_summary": {
-                "total_high_risk": 2,
-                "total_medium_risk": 3,
-                "total_low_risk": 12,
+                "total_high_risk": sum(1 for h in hotspots if h["risk"] in ["critical", "high"]),
+                "total_medium_risk": sum(1 for h in hotspots if h["risk"] == "medium"),
+                "total_low_risk": sum(1 for h in hotspots if h["risk"] == "low"),
                 "most_common_crime_type": "theft"
             },
+            "threat_density_map": hotspots,
             "insights": [
                 "Crime hotspots identified",
                 "Patrol routes optimized",

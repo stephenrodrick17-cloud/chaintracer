@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
-from ..modules.multi_agent_system import (
+from modules.multi_agent_system import (
     orchestrator,
     ComputerVisionAgent,
     NLPAgent,
@@ -30,6 +30,7 @@ class FraudCheckRequest(BaseModel):
 class CVAnalysisRequest(BaseModel):
     type: str = "image"
     filename: Optional[str] = None
+    description: Optional[str] = None
 
 
 class NLPAnalysisRequest(BaseModel):
@@ -39,10 +40,12 @@ class NLPAnalysisRequest(BaseModel):
 class SpeechAnalysisRequest(BaseModel):
     type: str = "audio"
     filename: Optional[str] = None
+    transcript: Optional[str] = None
 
 
 class GeospatialAnalysisRequest(BaseModel):
     locations: Optional[List[Dict[str, Any]]] = None
+    query: Optional[str] = "Analyze this area for potential threats"
 
 
 class GraphAnalysisRequest(BaseModel):
